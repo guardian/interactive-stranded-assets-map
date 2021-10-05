@@ -1,11 +1,10 @@
 import * as d3 from 'd3'
 import * as continents from 'assets/continents.json'
-
-console.log(continents.default)
+import { forceCollide } from 'shared/js/ForceCollide.js'
 
 const isMobile = window.matchMedia('(max-width: 600px)').matches;
 
-const atomEl = d3.select('.dorling-interactive-wrapper').node();
+const atomEl = d3.select('.demers-interactive-wrapper').node();
 
 const width = atomEl.getBoundingClientRect().width;
 const height = isMobile ? window.parent.innerHeight / 5 * 3 : width  / 1.1;
@@ -20,7 +19,7 @@ const projection = d3.geoEqualEarth()
 
 const path = d3.geoPath(projection);
 
-const svg = d3.select('.dorling-interactive-wrapper')
+const svg = d3.select('.demers-interactive-wrapper')
 .append('svg')
 .attr('width', width)
 .attr('height', height)
@@ -40,22 +39,47 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
 
 	console.log(d3.max(data, d => d.Scenario_11_SA))
 
-	const simulation = d3.forceSimulation(data)
-	.force("x", d3.forceX(d => projection([d.lon,d.lat])[0]))
-	.force("y", d3.forceY(d => projection([d.lon,d.lat])[1]))
-	.force("collide", d3.forceCollide(d => 1 + radius(d.Scenario_11_SA)))
-	.stop();
+	const simulation = d3
+    .forceSimulation(data)
+    .force("x",d3.forceX((d) => d.x))
+    .force("y",d3.forceY((d) => d.y))
+    .force("collide", forceCollide(data, 3));
 
-	for (let i = 0; i < 200; i++){
+     const node = svg
+    .append("g")
+    .attr("fill", "#e04a28")
+    .attr("fill-opacity", 0.9)
+    .attr("stroke", "#fff")
+    .attr("stroke-width", 0.5)
+    .selectAll("rect")
+    .data(data)
+    .join("rect")
+    .attr("x", (d) => d.x - d.width / 2)
+    .attr("y", (d) => d.y - d.height / 2)
+    .attr("width", (d) => d.width)
+    .attr("height", (d) => d.height);
+
+
+  simulation.on("tick", () => {
+    node
+      .attr("x", (d) => d.x - d.width / 2)
+      .attr("y", (d) => d.y - d.height / 2);
+    labels.attr("x", (d) => d.x).attr("y", (d) => d.y);
+  });
+
+  invalidation.then(() => simulation.stop());
+
+	/*for (let i = 0; i < 200; i++){
 	    simulation.tick();
 	}
 
-	map.selectAll("circle")
+	map.selectAll("rect")
     .data(data)
-    .enter().append("circle")
-    .attr("r", d => radius(d.Scenario_11_SA))
-    .attr("cx", d => d.x)
-    .attr("cy", d => d.y)
+    .enter().append("rect")
+    .attr("width", d => radius(d.Scenario_11_SA) * 2)
+    .attr("height", d => radius(d.Scenario_11_SA) * 2)
+    .attr("x", d => d.x)
+    .attr("y", d => d.y)
     .attr('class', d => d.Continent + ' ' + d.iso)
     .attr("fill", "steelblue")
     .attr("fill-opacity", 0.3)
@@ -67,6 +91,6 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
     .append('text')
     .attr('y', d => projection([d.xcoord,d.ycoord])[1] + 'px')
     .attr('x', d => projection([d.xcoord,d.ycoord])[0] + 'px')
-    .text(d => d.CONTINENT)
+    .text(d => d.CONTINENT)*/
 
 })
