@@ -5,6 +5,7 @@
 // @import "enhancer";
 // gu_grid pulls the css for gs-container and content__main-column
 // @import "gu_grid";
+@import "scrolly";
 
 .interactive-atom {
     margin: 0;
@@ -18,9 +19,40 @@
     }
 }
 
+.dorling-svg{
+	border: 1px solid red;
+}
+
 .Americas{fill:$inverted-red;stroke:$inverted-red;}
 .Asia{fill:$opinion-orange;stroke:$opinion-orange;}
 .Other{fill:$lifestyle-pink;stroke:$lifestyle-pink;}
 .Oceania{fill:$gu-lifestyle-kicker;stroke:$gu-lifestyle-kicker;}
 .Africa{fill:$green-main;stroke:$green-main;}
 .Europe{fill:$live-blue;stroke:$live-blue;}
+
+
+.yaxis {
+
+	display: none;
+
+	text{
+		font-size: 16px;
+	    line-height: 24px;
+	    font-family: "Guardian Text Egyptian Web",Georgia,serif;
+	    fill: #767676;
+
+	    @include mq($from: 100px, $until: 499px) {
+               font-size: 13px;
+    	}
+	}
+
+	line{
+		stroke: #eaeaea;
+	}
+
+	.domain{
+		display: none;
+	}
+    
+}
+
