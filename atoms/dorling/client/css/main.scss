@@ -19,16 +19,15 @@
     }
 }
 
-.dorling-svg{
-	border: 1px solid red;
-}
-
-.Americas{fill:$inverted-red;stroke:$inverted-red;}
-.Asia{fill:$opinion-orange;stroke:$opinion-orange;}
-.Other{fill:$lifestyle-pink;stroke:$lifestyle-pink;}
+.North.America{fill:$live-red;stroke:$live-red;}
+.South.America{fill:#ffe500;stroke:#ffe500;}
+.Americas{fill:#ffbb50;stroke:#ffbb50;}
+.Asia{fill:$live-blue;stroke:$live-blue;}
+.Other{fill:#ffabdb;stroke:#ffabdb;}
 .Oceania{fill:$gu-lifestyle-kicker;stroke:$gu-lifestyle-kicker;}
 .Africa{fill:$green-main;stroke:$green-main;}
-.Europe{fill:$live-blue;stroke:$live-blue;}
+.Africas{fill:#236925;stroke:#236925;}
+.Europe{fill:$sport-blue;stroke:$sport-blue;}
 
 
 .yaxis {
@@ -54,5 +53,36 @@
 		display: none;
 	}
     
+}
+
+
+.stranded-assets-tooltip{
+        pointer-events: none;
+        min-width:150px;
+        max-width: 300px;
+        height: max-content;
+        padding:8px;
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid #333;
+        color: #333333;
+        border-top: 1px solid #333;
+        position: absolute;
+        z-index: 100000;
+        line-height: 18.2px;
+        cursor: pointer;
+
+        opacity:0;
+
+        &.over{
+            opacity: 1;
+        }
+
+        font-size: 14px;
+
+        @include fs-header(3);
+}
+
+.scroll-text{
+	top:calc(100vh - 600px)
 }
 
