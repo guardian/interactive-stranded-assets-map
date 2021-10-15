@@ -1,44 +1,45 @@
 import * as d3 from 'd3'
+import { geoGilbert } from "d3-geo-projection"
 import * as continents from 'assets/continents.json'
 import ScrollyTeller from "shared/js/scrollyteller"
+import { numberWithCommas } from 'shared/js/util'
 
 const isMobile = window.matchMedia('(max-width: 600px)').matches;
 
 const atomEl = d3.select('.dorling-interactive-wrapper').node();
 
-const tooltip = d3.select('.stranded-assets-tooltip')
+const tooltip = d3.select('.stranded-assets-tooltips')
 
 const width = atomEl.getBoundingClientRect().width;
-const height = isMobile ? window.innerHeight : width  / 5 * 3 ;
+const height = window.innerHeight;
 
-const margin = {top:5, right:5, bottom:5, left:35}
+const margin = {top:25, right:5, bottom:25, left:isMobile ? 0 : 320}
 
-const projection = d3.geoEqualEarth();
+const projection = geoGilbert();
 
-let extent = {
-        type: "LineString",
+const extent = {
+        type: "Sphere",
 
          coordinates: [
-            [-20, -60],
-            [60, -60],
-            [60, 90],
-            [-20, 90],
+            [-180, -90],
+            [180, -90],      
+            [180, 90],
+            [-180, 90]
         ]
 }
 
-let extentMobile = {
-        type: "LineString",
-
-         coordinates: [
-            [-50, -60],
-            [160, -60],      
-            [160, 90],
-            [-50, 90],
-        ]
+if(isMobile)
+{
+    projection
+    .fitWidth(width, extent)
 }
+else
+{
+    projection
+    .fitExtent([[margin.left, 0], [width, height]], extent);
+}   
 
-projection
-.fitExtent([[0, 0], [width, isMobile ? height / 2 : height]], isMobile ? extentMobile : extent);
+
 
 const path = d3.geoPath(projection);
 
@@ -61,11 +62,13 @@ const radius = d3.scaleSqrt()
 const scrolly = new ScrollyTeller({
     parent: document.querySelector("#scrolly-1"),
     triggerTop: .5, // percentage from the top of the screen that the trigger should fire
-    triggerTopMobile: 0.75,
-    transparentUntilActive: isMobile ? false : true
+    triggerTopMobile: .5,
+    transparentUntilActive: true
     });
 
 let data ;
+
+let currentBlob = 1;
 
 
 d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wqAIoGEvLlrw5VsXVLlc.json')
@@ -77,7 +80,7 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
 
     let xScale = d3.scaleLinear()
     .domain([0, data.length-1])
-    .range([margin.left, width-margin.right])
+    .range([margin.left + 40, width-margin.right])
 
     let yScale = d3.scaleLinear()
     .domain(d3.extent(data, d => +d.Scenario_11_LostGDP))
@@ -89,8 +92,9 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
     .call(
         d3.axisLeft(yScale)
         .ticks(5)
-        .tickSizeInner(-width)
+        .tickSizeInner(-width + margin.left)
     )
+    .style('transform', `translate(${margin.left}px,0)`)
 
     axis
     .selectAll("text")
@@ -133,25 +137,47 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
     .enter().append("circle")
     .attr("cx", d => d.x)
     .attr("cy", d => d.y)
-    .attr('class', d => d.Continent + ' ' + d.Area)
+    .attr('class', d => d.Continent + ' ' + d.Area.replace(' ', '.'))
     .style("stroke-width", "2px")
     .attr("r", 0)
-    .on('mousemove', e => manageMove(e, '0'))
-    .on('mouseout', e => tooltip.classed('over', false))
-    
+    .on('mousemove', (e,d) => {manageMove(e); manageTooltip(d)})
+    .on('mouseover', e => {
 
-    labels.selectAll('text')
+            d3.select(e.target)
+            .classed('over', true)
+
+        
+        })
+        .on('mouseout', e => {
+            tooltip.classed('over', false)
+
+            d3.select(e.target)
+            .classed('over', false)
+        })
+
+    labels.selectAll('blah')
     .data(continents.default.filter(f => f.CONTINENT != 'Antarctica'))
     .enter()
     .append('text')
+    .attr('class', 'continent-label-bg')
     .attr('y', d => projection([d.xcoord,d.ycoord])[1] + 'px')
-    .attr('x', d => projection([d.xcoord,d.ycoord])[0] + 'px')
+    .attr('x', d => (projection([d.xcoord,d.ycoord])[0] - 40) + 'px')
     .text(d => d.CONTINENT)
-    .style('text-anchor', 'middle')
+    .call(wrap, 50)
+
+    labels.selectAll('blah')
+    .data(continents.default.filter(f => f.CONTINENT != 'Antarctica'))
+    .enter()
+    .append('text')
+    .attr('class', 'continent-label')
+    .attr('y', d => projection([d.xcoord,d.ycoord])[1] + 'px')
+    .attr('x', d => (projection([d.xcoord,d.ycoord])[0] - 40) + 'px')
+    .text(d => d.CONTINENT)
+    .call(wrap, 50)
 
     scrolly.addTrigger({num:1, do: () => {
 
-        console.log('1', d3.max(data, d => +d.Scenario_1_A))
+        currentBlob = 1;
 
         clearAnnotations()
 
@@ -172,18 +198,32 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
         .attr('cx', d => d.x + 'px')
         .attr("r", d => radius(+d.Scenario_1_A))
 
-        circles
-        .on('mousemove', e => manageMove(e, '1'))
+        
+        if(!isMobile)
+        {
+            let countries = labels.selectAll("blah")
+            .data(data.filter(f => f.iso === 'USA' || f.iso === 'Opec'))
+            .enter().append("text")
+            .attr('y', d => d.y + 'px')
+            .attr('x', d => d.x + 'px')
+            .text(d => d.iso)
+            .attr('text-anchor', 'middle')
+            .attr('class', 'label-country')
+        }
+
+        
+
+        if(!isMobile)setTimeout(d => makeAnnotation('Russia', "Russia would have $3.8trn in fossil fuel assets if climate action wasn't taken", 'right'), 500);
+
     
 
     }})
 
      scrolly.addTrigger({num:2, do: () => {
 
-        console.log('2', d3.max(data, d => +d.Scenario_1_A))
+        console.log('2')
 
-        //annotation
-        //Russia would have $3.8trn in fossil fuel assets if climate action wasn't taken
+        currentBlob = 2;
 
         radius
         .domain([0, d3.max(data, d => +d.Scenario_1_A)])
@@ -197,19 +237,13 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
         .attr('cx', d => d.x + 'px')
         .attr("r", d => radius(+d.Scenario_1_A))
 
-        setTimeout(d => makeAnnotation('Russia', "Russia would have $3.8trn in fossil fuel assets if climate action wasn't taken", 'right'), 500);
-
-        circles
-        .on('mousemove', e => manageMove(e, '1'))
-
-        
-    
-
     }})
 
     scrolly.addTrigger({num:3, do: () => {
 
-        console.log('3', d3.max(data, d => +d.Scenario_1_A))
+        console.log('3')
+
+        currentBlob = 3;
 
         clearAnnotations()
 
@@ -223,13 +257,13 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
         .attr('cx', d => d.x + 'px')
         .attr("r", d => radius(+d.Scenario_12_SA))
 
-        circles
-        .on('mousemove', e => manageMove(e, '2'))
     }})
 
     scrolly.addTrigger({num:4, do: () => {
 
-        console.log('4', d3.max(data, d => +d.Scenario_1_A))
+        console.log('4')
+
+        currentBlob = 4;
 
         radius
         .domain([0, d3.max(data, d => +d.Scenario_1_A)])
@@ -243,11 +277,7 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
         .attr('cx', d => d.x + 'px')
         .attr("r", d => radius(+d.Scenario_12_SA))
 
-        setTimeout(d => makeAnnotation('USA', "The USA's real value of fossil fuel assets would stand at $2.1trn, after 62% of the total becomes stranded", 'right'), 500);
-
-        circles
-        .on('mousemove', e => manageMove(e, '2'))
-
+        if(!isMobile)setTimeout(d => makeAnnotation('USA', "The USA's real value of fossil fuel assets would stand at $2.1trn, after 62% of the total becomes stranded", 'right'), 500);
         
     }})
 
@@ -255,6 +285,8 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
 
         console.log('5')
 
+        currentBlob = 5;
+
         clearAnnotations()
 
         mapStatic.style('display', 'block')
@@ -274,14 +306,14 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
         .attr('cx', d => d.x + 'px')
         .attr("r", d => radius(+d.Scenario_11_SA))
 
-        circles
-        .on('mousemove', e => manageMove(e, '3'))
     }})
 
     scrolly.addTrigger({num:6, do: () => {
 
         console.log('6')
 
+        currentBlob = 6;
+
         mapStatic.style('display', 'block')
 
         clearAnnotations()
@@ -302,10 +334,7 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
         .attr("r", d => radius(+d.Scenario_11_SA))
 
 
-        setTimeout(d => makeAnnotation('China', "Over half of China's fossil fuel assets are also set to be stranded", 'right'), 500)
-
-        circles
-        .on('mousemove', e => manageMove(e, '3'))
+        if(!isMobile)setTimeout(d => makeAnnotation('China', "Over half of China's fossil fuel assets are also set to be stranded", 'left'), 500)
 
         
     }})
@@ -314,6 +343,8 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
 
         console.log('7')
 
+        currentBlob = 7;
+
         clearAnnotations()
 
         mapStatic.style('display', 'none')
@@ -327,7 +358,7 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
         .duration(500)
         .attr('cy', d => yScale(+d.Scenario_11_LostGDP) + 'px')
         .attr('cx', (d,i) => xScale(i) + 'px')
-        .attr('r', 3)
+        .attr('r', isMobile ? 2 : 3)
 
         bars.selectAll('path')
         .data(data)
@@ -337,10 +368,9 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
         .transition()
         .duration(500)
         .attr('d', (d,i) => `M${xScale(i)},${yScale(0)} L${xScale(i)},${yScale(d.Scenario_11_LostGDP)}`)
-        .attr('stroke', 'black')
+        .attr('stroke', '#eaeaea')
+        .attr('stroke-width', '1.5px')
 
-        circles
-        .on('mousemove', e => manageMove(e, '4'))
         
     }})
 
@@ -348,6 +378,8 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
 
         console.log('8')
 
+        currentBlob = 8;
+
         clearAnnotations()
 
         mapStatic.style('display', 'none')
@@ -361,7 +393,7 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
         .duration(500)
         .attr('cy', d => yScale(+d.Scenario_11_LostGDP) + 'px')
         .attr('cx', (d,i) => xScale(i) + 'px')
-        .attr('r', 3)
+        .attr('r', isMobile ? 2 : 3)
 
         bars.selectAll('path')
         .data(data)
@@ -371,14 +403,10 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
         .transition()
         .duration(500)
         .attr('d', (d,i) => `M${xScale(i)},${yScale(0)} L${xScale(i)},${yScale(d.Scenario_11_LostGDP)}`)
-        .attr('stroke', 'black')
+        .attr('stroke', '#eaeaea')
+        .attr('stroke-width', '1.5px')
 
-        setTimeout(d => makeAnnotation('China', "China's economy would still grow at the same time as it transitions from fossil fuels", 'top'),500)
-
-        circles
-        .on('mousemove', e => manageMove(e, '4'))
-
-        
+        if(!isMobile)setTimeout(d => makeAnnotation('China', "China's economy would still grow at the same time as it transitions from fossil fuels", 'top'),500)
         
     }})
 
@@ -390,11 +418,111 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
 
 })
 
+const manageTooltip = (data) => {
 
-const manageMove = (event, text) => {
+    console.log('namage tooltip', currentBlob)
 
-    console.log(event)
 
+    tooltip.select('#tooltip-0').html(data.Area)
+
+    switch(currentBlob){
+        case 1:
+
+        tooltip.select('#tooltip-1').style('display', 'block')
+        tooltip.select('#tooltip-2').style('display', 'none')
+        tooltip.select('#tooltip-3').style('display', 'none')
+        tooltip.select('#tooltip-1 .stranded-tooltip-figure').html('$' + numberWithCommas(+data.Scenario_1_A) + 'bn')
+        tooltip.select('#tooltip-1 .stranded-tooltip-subheader').html('Estimated in business-as-usual scenario')
+
+        break;
+
+        case 2:
+
+        tooltip.select('#tooltip-1').style('display', 'block')
+        tooltip.select('#tooltip-2').style('display', 'none')
+        tooltip.select('#tooltip-3').style('display', 'none')
+        tooltip.select('#tooltip-1 .stranded-tooltip-figure').html('$' + numberWithCommas(+data.Scenario_1_A) + 'bn')
+        tooltip.select('#tooltip-1 .stranded-tooltip-subheader').html('Estimated in business-as-usual scenario')
+
+        break;
+
+        case 3:
+
+        tooltip.select('#tooltip-1').style('display', 'none')
+        tooltip.select('#tooltip-2').style('display', 'block')
+        tooltip.select('#tooltip-3').style('display', 'block')
+        tooltip.select('#tooltip-2 .stranded-tooltip-figure').html('$' + numberWithCommas(+data.Scenario_12_SA) + 'bn')
+        tooltip.select('#tooltip-2 .stranded-tooltip-note').html('$' + numberWithCommas(+data.Scenario_12_AssetShareLost) + "% of World's total")
+        tooltip.select('#tooltip-3 .stranded-tooltip-figure').html(`${+data.Scenario_12_LostGDP > 0 ? '+' : ''}${numberWithCommas(+data.Scenario_12_LostGDP)}%`)
+        tooltip.select('#tooltip-2 .stranded-tooltip-subheader').html('In net zero scenario with Opec sell-off')
+
+        break;
+
+        case 4:
+
+        tooltip.select('#tooltip-1').style('display', 'none')
+        tooltip.select('#tooltip-2').style('display', 'block')
+        tooltip.select('#tooltip-3').style('display', 'block')
+        tooltip.select('#tooltip-2 .stranded-tooltip-figure').html('$' + numberWithCommas(+data.Scenario_12_SA) + 'bn')
+        tooltip.select('#tooltip-2 .stranded-tooltip-note').html('$' + numberWithCommas(+data.Scenario_12_AssetShareLost) + "% of World's total")
+        tooltip.select('#tooltip-3 .stranded-tooltip-figure').html(`${+data.Scenario_12_LostGDP > 0 ? '+' : ''}${numberWithCommas(+data.Scenario_12_LostGDP)}%`)
+        tooltip.select('#tooltip-2 .stranded-tooltip-subheader').html('In net zero scenario with Opec sell-off')
+
+        break;
+
+        case 5:
+
+        tooltip.select('#tooltip-1').style('display', 'none')
+        tooltip.select('#tooltip-2').style('display', 'block')
+        tooltip.select('#tooltip-3').style('display', 'block')
+        tooltip.select('#tooltip-2 .stranded-tooltip-figure').html('$' + numberWithCommas(+data.Scenario_11_SA) + 'bn')
+        tooltip.select('#tooltip-2 .stranded-tooltip-note').html('$' + numberWithCommas(+data.Scenario_11_AssetShareLost) + "% of World's total")
+        tooltip.select('#tooltip-3 .stranded-tooltip-figure').html(`${+data.Scenario_11_LostGDP > 0 ? '+' : ''}${numberWithCommas(+data.Scenario_11_LostGDP)}%`)
+        tooltip.select('#tooltip-2 .stranded-tooltip-subheader').html('In net zero scenario with Opec quota')
+
+
+        break;
+
+        case 6:
+
+        tooltip.select('#tooltip-1').style('display', 'none')
+        tooltip.select('#tooltip-2').style('display', 'block')
+        tooltip.select('#tooltip-3').style('display', 'block')
+        tooltip.select('#tooltip-2 .stranded-tooltip-figure').html('$' + numberWithCommas(+data.Scenario_11_SA) + 'bn')
+        tooltip.select('#tooltip-2 .stranded-tooltip-note').html('$' + numberWithCommas(+data.Scenario_11_AssetShareLost) + "% of World's total")
+        tooltip.select('#tooltip-3 .stranded-tooltip-figure').html(`${+data.Scenario_11_LostGDP > 0 ? '+' : ''}${numberWithCommas(+data.Scenario_11_LostGDP)}%`)
+        tooltip.select('#tooltip-2 .stranded-tooltip-subheader').html('In net zero scenario with Opec quota')
+
+        break;
+
+        case 7:
+
+        tooltip.select('#tooltip-1').style('display', 'none')
+        tooltip.select('#tooltip-2').style('display', 'block')
+        tooltip.select('#tooltip-3').style('display', 'block')
+        tooltip.select('#tooltip-2 .stranded-tooltip-figure').html('$' + numberWithCommas(+data.Scenario_11_SA) + 'bn')
+        tooltip.select('#tooltip-2 .stranded-tooltip-note').html('$' + numberWithCommas(+data.Scenario_11_AssetShareLost) + "% of World's total")
+        tooltip.select('#tooltip-3 .stranded-tooltip-figure').html(`${+data.Scenario_11_LostGDP > 0 ? '+' : ''}${numberWithCommas(+data.Scenario_11_LostGDP)}%`)
+        tooltip.select('#tooltip-2 .stranded-tooltip-subheader').html('In net zero scenario with Opec quota')
+
+        break;
+
+        case 8:
+
+        tooltip.select('#tooltip-1').style('display', 'none')
+        tooltip.select('#tooltip-2').style('display', 'block')
+        tooltip.select('#tooltip-3').style('display', 'block')
+        tooltip.select('#tooltip-2 .stranded-tooltip-figure').html('$' + numberWithCommas(+data.Scenario_11_SA) + 'bn')
+        tooltip.select('#tooltip-2 .stranded-tooltip-note').html('$' + numberWithCommas(+data.Scenario_11_AssetShareLost) + "% of World's total")
+        tooltip.select('#tooltip-3 .stranded-tooltip-figure').html(`${+data.Scenario_11_LostGDP > 0 ? '+' : ''}${numberWithCommas(+data.Scenario_11_LostGDP)}%`)
+        tooltip.select('#tooltip-2 .stranded-tooltip-subheader').html('In net zero scenario with Opec quota')
+
+        break;
+    }
+}
+
+
+const manageMove = (event) => {
 
     tooltip.classed('over', true)
 
@@ -426,7 +554,7 @@ const clearAnnotations = () => {
 
 }
 
-const makeAnnotation = (country_name, text, align = 'left', textWidth = 130, offsetX = 30, offsetY = 15) => {
+const makeAnnotation = (country_name, text, align = 'left', textWidth = 130, offsetX = 20, offsetY = 15) => {
 
     let node = map.select('.' + country_name)
     let r = +node.attr('r')

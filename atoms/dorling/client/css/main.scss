@@ -19,15 +19,15 @@
     }
 }
 
-.North.America{fill:$live-red;stroke:$live-red;}
-.South.America{fill:#ffe500;stroke:#ffe500;}
-.Americas{fill:#ffbb50;stroke:#ffbb50;}
-.Asia{fill:$live-blue;stroke:$live-blue;}
-.Other{fill:#ffabdb;stroke:#ffabdb;}
-.Oceania{fill:$gu-lifestyle-kicker;stroke:$gu-lifestyle-kicker;}
-.Africa{fill:$green-main;stroke:$green-main;}
-.Africas{fill:#236925;stroke:#236925;}
-.Europe{fill:$sport-blue;stroke:$sport-blue;}
+.North.America{fill:$live-red;stroke:$live-red;&.over{stroke:#333;}}
+.South.America{fill:#ffe500;stroke:#ffe500;&.over{stroke:#333;}}
+.Americas{fill:#ffe500;stroke:#ffe500;&.over{stroke:#333;}}
+.Asia{fill:$live-blue;stroke:$live-blue;&.over{stroke:#333;}}
+.Other{fill:#ffabdb;stroke:#ffabdb;&.over{stroke:#333;}}
+.Oceania{fill:$gu-lifestyle-kicker;stroke:$gu-lifestyle-kicker;&.over{stroke:#333;}}
+.Africa{fill:$green-main;stroke:$green-main;&.over{stroke:#333;}}
+.Africas{fill::$green-main;stroke::$green-main;&.over{stroke:#333;}}
+.Europe{fill:$sport-blue;stroke:$sport-blue;&.over{stroke:#333;}}
 
 
 .yaxis {
@@ -56,16 +56,15 @@
 }
 
 
-.stranded-assets-tooltip{
+.stranded-assets-tooltips{
         pointer-events: none;
         min-width:150px;
         max-width: 300px;
         height: max-content;
         padding:8px;
-        background: rgba(255, 255, 255, 0.9);
-        border: 1px solid #333;
-        color: #333333;
-        border-top: 1px solid #333;
+        background: rgba(51, 51, 51, 0.9);
+        border: 2px solid black;
+        color: #FFFFFF;
         position: absolute;
         z-index: 100000;
         line-height: 18.2px;
@@ -79,10 +78,140 @@
 
         font-size: 14px;
 
-        @include fs-header(3);
+        .stranded-tooltip{
+        	margin-bottom: 12px;
+        }
+
+        #tooltip-0{
+        	@include fs-header(3);
+        	margin-bottom: 6px;
+        }
+
+        #tooltip-1, #tooltip-2, #tooltip-3{
+        	display: none;
+        }
+
+        .stranded-tooltip-header{
+        	@include fs-header(1);
+        	font-size: 14px;
+        	
+        }
+
+        .stranded-tooltip-subheader{
+        	color:$highlight-yellow;
+        	@include fs-textSans(1);
+        	font-size: 12px;
+        }
+
+
+        .stranded-tooltip-figure, .stranded-tooltip-note{
+        	font-family:$f-serif-headline;
+        	font-size:24px;
+        	margin-bottom: 4px;
+        	
+        }
+        .stranded-tooltip-note{
+        	font-size: 12px;
+        }
+
+        
 }
 
-.scroll-text{
-	top:calc(100vh - 600px)
+.annotation,.annotationBg{
+	font-family:$f-serif-headline;
+	fill:#333333;
+}
+.annotationBg{
+	stroke:#fff;
+	stroke-width:4px;
+}
+
+.continent-label-bg, .continent-label{
+	pointer-events: none;
+	font-family:$f-serif-headline;
+	fill:#fff;
+}
+
+.continent-label-bg{
+	stroke:#333;
+	stroke-width:4px;
+	stroke-opacity: .3;
+}
+
+ .scroll-text{
+
+ 	@include mq($from: 100px,  $until: 499px) {
+		top:calc(100vh /2 );
+	}
+
+ 	@include mq($from: 500px) {
+		top:calc(100vh /2 - 150px);
+	}
+} 
+
+.scroll-text__div {
+
+	hr{
+		border: .7px solid #333;
+		background:#333;
+		width: 10%;
+		margin-left: 0;
+		padding: 0;
+		margin: 0;
+	}
+
+	h2{
+		margin:0;
+		padding-top: 3px;
+		@include fs-header(5); margin-bottom: 8px;
+	    width: 100%;
+	    margin-left: 0;
+	    background-color: #ffffff !important;
+	    border-top: 1px solid #333;
+	    margin-bottom: 1rem;
+		font-family: GuardianTextEgyptian,Guardian Text Egyptian Web,Georgia,serif;
+		font-size: 18px;
+		line-height: 21px;
+		background-color: #333333;
+	}
+
+
+	max-width: 320px;
+
+	@include mq($from: 100px, $until: 499px) {
+		max-width: 100%;
+	}
+
+	
+
+
+
+	
+	width: 100%;
+	text-align: left;
+	margin-left: 0px;
+	padding: 6px 10px 0px;
+	    padding-top: 6px;
+	    padding-bottom: 0px;
+	font-size: 28px;
+	line-height: 32px;
+	font-family: "Guardian Headline","Guardian Egyptian Web","Guardian Headline Full",Georgia,serif;
+	font-weight: normal;
+	color: #000;
+	font-size: 16px;
+	line-height: 22px;
+	position: relative;
+	padding-top: 4px;
+	padding-bottom: 6px;
+	box-sizing: border-box;
+	-webkit-transform: translate3d(0, 0, 0);
+
+	box-shadow:none !important;
+	border:none !important;
+}
+
+.label-country{
+	@include fs-textSans(3);
+	fill:#fff;
 }
 
