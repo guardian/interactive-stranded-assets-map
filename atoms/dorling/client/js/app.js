@@ -3,15 +3,16 @@ import { geoGilbert } from "d3-geo-projection"
 import * as continents from 'assets/continents.json'
 import ScrollyTeller from "shared/js/scrollyteller"
 import { numberWithCommas } from 'shared/js/util'
+import textures from 'textures';
 
-const isMobile = window.matchMedia('(max-width: 600px)').matches;
+const isMobile = window.matchMedia('(max-width: 720px)').matches;
 
 const atomEl = d3.select('.dorling-interactive-wrapper').node();
 
 const tooltip = d3.select('.stranded-assets-tooltips')
 
 const width = atomEl.getBoundingClientRect().width;
-const height = window.innerHeight;
+const height = isMobile ? (window.innerHeight / 2) - 25: window.innerHeight;
 
 const margin = {top:25, right:5, bottom:25, left:isMobile ? 0 : 320}
 
@@ -48,7 +49,13 @@ const svg = d3.select('.dorling-interactive-wrapper')
 .attr('class', 'dorling-svg')
 .attr('width', width)
 .attr('height', height)
-.style('margin-top', (window.innerHeight - height) /2 + 'px')
+.style('margin-top', isMobile ? 0 : (window.innerHeight - height) / 2 + 'px')
+
+const texture = textures
+  .lines()
+  .thicker();
+
+svg.call(texture);
 
 const axis = svg.append('g')
 const bars = svg.append('g')
@@ -63,7 +70,7 @@ const scrolly = new ScrollyTeller({
     parent: document.querySelector("#scrolly-1"),
     triggerTop: .5, // percentage from the top of the screen that the trigger should fire
     triggerTopMobile: .5,
-    transparentUntilActive: true
+    transparentUntilActive: isMobile ? false : true
     });
 
 let data ;
@@ -101,6 +108,7 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
     .style("text-anchor", "start")
     .attr('x', 10)
     .attr('y', -10)
+    .text(d => d == 10 ? 10 + '% GDP change by 2036' : d)
 
     axis
     .selectAll('line')
@@ -108,7 +116,7 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
 
 	radius
 	.domain([0, d3.max(data, d => +d.Scenario_1_A)])
-	.range([isMobile ? 3 : 6, isMobile ? 20 : 60])
+	.range([3, 90 * width /1300])
 
 	const simulation = d3.forceSimulation(data)
 	.force("x", d3.forceX(d => projection([d.lon,d.lat])[0]))
@@ -213,7 +221,10 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
 
         
 
-        if(!isMobile)setTimeout(d => makeAnnotation('Russia', "Russia would have $3.8trn in fossil fuel assets if climate action wasn't taken", 'right'), 500);
+        if(!isMobile)setTimeout(d => makeAnnotation('Russia', "Russia's fossil fuel assets are projected to be valued at $3.8trn if no climate action is taken", 'right'), 500);
+
+        d3.select('.stranded-tooltips')
+        .style('flex-direction', 'column')
 
     
 
@@ -237,6 +248,9 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
         .attr('cx', d => d.x + 'px')
         .attr("r", d => radius(+d.Scenario_1_A))
 
+        d3.select('.stranded-tooltips')
+        .style('flex-direction', 'column')
+
     }})
 
     scrolly.addTrigger({num:3, do: () => {
@@ -256,6 +270,9 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
         .attr("cy", d => d.y + 'px')
         .attr('cx', d => d.x + 'px')
         .attr("r", d => radius(+d.Scenario_12_SA))
+
+        d3.select('.stranded-tooltips')
+        .style('flex-direction', 'column')
 
     }})
 
@@ -278,6 +295,9 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
         .attr("r", d => radius(+d.Scenario_12_SA))
 
         if(!isMobile)setTimeout(d => makeAnnotation('USA', "The USA's real value of fossil fuel assets would stand at $2.1trn, after 62% of the total becomes stranded", 'right'), 500);
+
+        d3.select('.stranded-tooltips')
+        .style('flex-direction', 'column')
         
     }})
 
@@ -305,6 +325,9 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
         .attr("cy", d => d.y + 'px')
         .attr('cx', d => d.x + 'px')
         .attr("r", d => radius(+d.Scenario_11_SA))
+
+        d3.select('.stranded-tooltips')
+        .style('flex-direction', 'column')
 
     }})
 
@@ -336,6 +359,9 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
 
         if(!isMobile)setTimeout(d => makeAnnotation('China', "Over half of China's fossil fuel assets are also set to be stranded", 'left'), 500)
 
+        d3.select('.stranded-tooltips')
+        .style('flex-direction', 'column')
+
         
     }})
 
@@ -358,7 +384,7 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
         .duration(500)
         .attr('cy', d => yScale(+d.Scenario_11_LostGDP) + 'px')
         .attr('cx', (d,i) => xScale(i) + 'px')
-        .attr('r', isMobile ? 2 : 3)
+        .attr('r', isMobile ? 1 : 3)
 
         bars.selectAll('path')
         .data(data)
@@ -370,6 +396,20 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
         .attr('d', (d,i) => `M${xScale(i)},${yScale(0)} L${xScale(i)},${yScale(d.Scenario_11_LostGDP)}`)
         .attr('stroke', '#eaeaea')
         .attr('stroke-width', '1.5px')
+
+
+        d3.select('.stranded-tooltips')
+        .style('flex-direction', 'column-reverse')
+
+        map.select('.Asia.China')
+        .each(d => {
+            annotations.append('text')
+            .attr('y', d.y + 'px')
+            .attr('x', d.x + 'px')
+            .style("pointer-events", "none")
+            .text(d.iso)
+        })
+
 
         
     }})
@@ -393,7 +433,7 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
         .duration(500)
         .attr('cy', d => yScale(+d.Scenario_11_LostGDP) + 'px')
         .attr('cx', (d,i) => xScale(i) + 'px')
-        .attr('r', isMobile ? 2 : 3)
+        .attr('r', isMobile ? 1 : 3)
 
         bars.selectAll('path')
         .data(data)
@@ -407,6 +447,9 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
         .attr('stroke-width', '1.5px')
 
         if(!isMobile)setTimeout(d => makeAnnotation('China', "China's economy would still grow at the same time as it transitions from fossil fuels", 'top'),500)
+
+            d3.select('.stranded-tooltips')
+        .style('flex-direction', 'column-reverse')
         
     }})
 
@@ -419,9 +462,6 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
 })
 
 const manageTooltip = (data) => {
-
-    console.log('namage tooltip', currentBlob)
-
 
     tooltip.select('#tooltip-0').html(data.Area)
 
@@ -537,7 +577,10 @@ const manageMove = (event) => {
     let posY = top + 15;
 
     if(posX + tWidth > width) posX = width - tWidth;
-    if(posX < 0) posX = 0;
+    if(posX < margin.left) posX = margin.left;
+
+    if(posY + tHeight > height) posY = posY - tHeight - 25;
+    if(posY < 0) posY = 0;
 
     tooltip.style('left',  posX + 'px')
     tooltip.style('top', posY + 'px')

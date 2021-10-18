@@ -19,6 +19,10 @@
     }
 }
 
+.dorling-interactive-wrapper{
+	background:white;
+}
+
 .North.America{fill:$live-red;stroke:$live-red;&.over{stroke:#333;}}
 .South.America{fill:#ffe500;stroke:#ffe500;&.over{stroke:#333;}}
 .Americas{fill:#ffe500;stroke:#ffe500;&.over{stroke:#333;}}
@@ -69,14 +73,20 @@
         z-index: 100000;
         line-height: 18.2px;
         cursor: pointer;
+        font-size: 14px;
 
-        opacity:0;
+       	opacity:0;
 
         &.over{
             opacity: 1;
         }
 
-        font-size: 14px;
+        
+
+        .stranded-tooltips{
+        	display: flex;
+        	flex-direction:column;
+        }
 
         .stranded-tooltip{
         	margin-bottom: 12px;
@@ -138,10 +148,12 @@
 	stroke-opacity: .3;
 }
 
- .scroll-text{
+.scroll-text{
 
  	@include mq($from: 100px,  $until: 499px) {
-		top:calc(100vh /2 );
+		top:calc( calc(100vh /2) + 25px);
+
+		z-index:-1;
 	}
 
  	@include mq($from: 500px) {
@@ -182,11 +194,7 @@
 		max-width: 100%;
 	}
 
-	
 
-
-
-	
 	width: 100%;
 	text-align: left;
 	margin-left: 0px;
@@ -213,5 +221,10 @@
 .label-country{
 	@include fs-textSans(3);
 	fill:#fff;
+}
+
+.label-country-grey{
+	@include fs-textSans(3);
+	fill:#bababa;
 }
 

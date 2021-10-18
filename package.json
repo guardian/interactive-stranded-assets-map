@@ -64,6 +64,7 @@
     "gulp-replace": "^1.0.0",
     "mkdirp": "^0.5.1",
     "terser-webpack-plugin": "^4.2.2",
+    "textures": "^1.2.3",
     "uglifyjs-webpack-plugin": "^2.2.0",
     "unfetch": "^4.2.0"
   }
