@@ -211,11 +211,11 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
         if(!isMobile)
         {
             let countries = labels.selectAll("blah")
-            .data(data.filter(f => f.iso === 'USA' || f.iso === 'Opec'))
+            .data(data.filter(f => f.iso === 'USA' || f.iso === 'Opec' || f.iso === 'GBR'))
             .enter().append("text")
-            .attr('y', d => d.y + 'px')
+            .attr('y', d => d.y + 5 + 'px')
             .attr('x', d => d.x + 'px')
-            .text(d => d.iso == 'USA' ? 'US' : d.iso)
+            .text(d => d.iso == 'USA' ? 'US' : d.iso == 'GBR' ? 'UK' : d.iso)
             .attr('text-anchor', 'middle')
             .attr('class', 'label-country')
         }
