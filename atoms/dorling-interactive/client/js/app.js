@@ -3,9 +3,10 @@ import { geoGilbert } from "d3-geo-projection"
 import * as continents from 'assets/continents.json'
 import ScrollyTeller from "shared/js/scrollyteller"
 import { numberWithCommas } from 'shared/js/util'
-import textures from 'textures';
 
 const isMobile = window.matchMedia('(max-width: 720px)').matches;
+const isDesktop = window.matchMedia('(max-width: 980px)').matches;
+const isWide = window.matchMedia('(max-width: 1300px)').matches;
 
 const atomEl = d3.select('.dorling-interactive-wrapper').node();
 
@@ -14,7 +15,9 @@ const tooltip = d3.select('.stranded-assets-tooltips')
 const width = atomEl.getBoundingClientRect().width;
 const height = isMobile ? (window.innerHeight / 2) - 25 : window.innerHeight;
 
-const margin = {top:25, right:5, bottom:25, left:isMobile ? 0 : 320}
+console.log('v2', width)
+
+const margin = {top:25, right:5, bottom:25, left:isDesktop ? 0 : 330}
 
 const projection = geoGilbert();
 
@@ -50,12 +53,6 @@ const svg = d3.select('.dorling-interactive-wrapper')
 .attr('width', width)
 .attr('height', height)
 .style('margin-top', isMobile ? 0 : (window.innerHeight - height) / 2 + 'px')
-
-const texture = textures
-  .lines()
-  .thicker();
-
-svg.call(texture);
 
 const axis = svg.append('g')
 const bars = svg.append('g')
@@ -148,6 +145,7 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
     .attr('class', d => d.Continent + ' ' + d.Area.replace(' ', '.'))
     .style("stroke-width", "2px")
     .attr("r", 0)
+    .style('cursor', 'pointer')
     .on('mousemove', (e,d) => {manageMove(e); manageTooltip(d)})
     .on('mouseover', e => {
 
@@ -187,7 +185,10 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
 
         currentBlob = 1;
 
-        clearAnnotations()
+        resetTooltip()
+
+        d3.select('.hr1')
+        .style('width', '25%')
 
         radius
         .domain([0, d3.max(data, d => +d.Scenario_1_A)])
@@ -214,14 +215,17 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
             .enter().append("text")
             .attr('y', d => d.y + 'px')
             .attr('x', d => d.x + 'px')
-            .text(d => d.iso)
+            .text(d => d.iso == 'USA' ? 'US' : d.iso)
             .attr('text-anchor', 'middle')
             .attr('class', 'label-country')
         }
 
-        //makeAnnotation = (country_name, text, align = 'left', textWidth = 130, offsetX = 20, offsetY = 15
+        setTimeout(d => {
 
-        if(!isMobile)setTimeout(d => makeAnnotation('Russia', "Russia's fossil fuel assets are projected to be valued at $3.8trn if no climate action is taken", 'right', 120, 10, 50), 500);
+            clearAnnotations()
+
+            if(!isMobile)makeAnnotation('Russia', "Russia's fossil fuel assets are projected to be valued at $3.8trn if no climate action is taken", 'top', 180, 0, 65, 85)
+        }, 500);
 
         d3.select('.stranded-tooltips')
         .style('flex-direction', 'column')
@@ -235,6 +239,10 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
         console.log('2')
 
         currentBlob = 2;
+
+        resetTooltip()
+
+        clearAnnotations()
 
         radius
         .domain([0, d3.max(data, d => +d.Scenario_1_A)])
@@ -258,6 +266,13 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
         console.log('3')
 
         currentBlob = 3;
+
+        resetTooltip()
+
+        clearAnnotations()
+
+        d3.select('.hr2')
+        .style('width', '50%')
 
         clearAnnotations()
 
@@ -284,10 +299,14 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
 
         currentBlob = 4;
 
+        resetTooltip()
+
+        clearAnnotations()
+
         radius
         .domain([0, d3.max(data, d => +d.Scenario_1_A)])
 
-        clearAnnotations()
+        
 
         map.selectAll("circle")
         .transition()
@@ -296,7 +315,15 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
         .attr('cx', d => d.x + 'px')
         .attr("r", d => radius(+d.Scenario_12_SAtooltip))
 
-        if(!isMobile)setTimeout(d => makeAnnotation('USA', "The USA's real value of fossil fuel assets would stand at $2.1trn, after 62% of the total becomes stranded", 'right', 200, 15, 35), 500);
+        
+        setTimeout(d => {
+
+            clearAnnotations()
+
+
+            if(!isMobile)makeAnnotation('USA', "The US's real value of fossil fuel assets would stand at $2.1trn, after 62% of the total becomes stranded", 'right', 200, 15, 35)
+        }
+            , 500);
 
         d3.select('.stranded-tooltips')
         .style('flex-direction', 'column')
@@ -309,7 +336,12 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
 
         currentBlob = 5;
 
+        resetTooltip()
+
         clearAnnotations()
+
+        d3.select('.hr3')
+        .style('width', '75%')
 
 
         yAxis.style('display','none');
@@ -338,6 +370,8 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
 
         currentBlob = 6;
 
+        resetTooltip()
+
         mapStatic.attr('display', 'block')
 
         clearAnnotations()
@@ -357,7 +391,13 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
         .attr('cx', d => d.x + 'px')
         .attr("r", d => radius(+d.Scenario_11_SAtooltip))
 
-        if(!isMobile)setTimeout(d => makeAnnotation('China-stranded', "Over half of China's fossil fuel assets are also set to be stranded", 'left', 200, 15,0), 500)
+        
+        setTimeout(d => {
+
+            clearAnnotations()
+
+            if(!isMobile)makeAnnotation('China-stranded', "Over half of China's fossil fuel assets are also set to be stranded", 'left', 200, 15,0)
+        }, 500)
 
         d3.select('.stranded-tooltips')
         .style('flex-direction', 'column')
@@ -375,7 +415,12 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
 
         currentBlob = 7;
 
-        clearAnnotations()
+        resetTooltip()
+
+        
+
+        d3.select('.hr4')
+        .style('width', '100%')
 
         yAxis.style('display','block');
 
@@ -403,10 +448,12 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
         d3.select('.stranded-tooltips')
         .style('flex-direction', 'column-reverse')
 
-        if(!isMobile)setTimeout(d => {
+        setTimeout(d => {
 
-            makeAnnotation('China', "China", 'top', 50, 0, 0);
-            makeAnnotation('Russia', "Russia", 'top', 50, 0, 0)
+            clearAnnotations()
+
+            makeAnnotation('China', "China", 'top', 50, 0, 0, 30);
+            makeAnnotation('Russia', "Russia", 'top', 50, 0, 0, 30)
 
         },500)
 
@@ -420,7 +467,7 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
 
         currentBlob = 8;
 
-        clearAnnotations()
+        resetTooltip()
 
         yAxis.style('display','block');
 
@@ -444,10 +491,14 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
         .attr('stroke', '#eaeaea')
         .attr('stroke-width', '1.5px')
 
-        if(!isMobile)setTimeout(d => { 
-            makeAnnotation('China', "China's economy would still grow at the same time as it transitions from fossil fuels", 'top', 140, 20, 0)
+        setTimeout(d => {
+
+            clearAnnotations()
+
+            if(!isMobile)makeAnnotation('China', "China's economy would still grow at the same time as it transitions from fossil fuels", 'top', 150, 0, 0, 100)
             makeAnnotation('Argentina', "Argentina", 'left', 70, 10, -15)
             makeAnnotation('Norway', "Norway", 'right', 100, 10, -5)
+            makeAnnotation('UK', "UK", 'top', 25, 0, 0, 30)
         },500)
 
 
@@ -476,6 +527,9 @@ const manageTooltip = (data) => {
         tooltip.select('#tooltip-3').style('display', 'none')
         tooltip.select('#tooltip-1 .stranded-tooltip-figure').html('$' + numberWithCommas(+data.Scenario_1_A) + 'bn')
         tooltip.select('#tooltip-1 .stranded-tooltip-subheader').html('Estimated in business-as-usual scenario')
+        tooltip.select('#tooltip-2 .stranded-tooltip-header').html('Stranded assets')
+        tooltip.select('#tooltip-1 .stranded-tooltip-header').html('Fossil fuel assets')
+
 
         break;
 
@@ -486,6 +540,8 @@ const manageTooltip = (data) => {
         tooltip.select('#tooltip-3').style('display', 'none')
         tooltip.select('#tooltip-1 .stranded-tooltip-figure').html('$' + numberWithCommas(+data.Scenario_1_A) + 'bn')
         tooltip.select('#tooltip-1 .stranded-tooltip-subheader').html('Estimated in business-as-usual scenario')
+        tooltip.select('#tooltip-2 .stranded-tooltip-header').html('Stranded assets')
+        tooltip.select('#tooltip-1 .stranded-tooltip-header').html('Fossil fuel assets')
 
         break;
 
@@ -498,6 +554,10 @@ const manageTooltip = (data) => {
         tooltip.select('#tooltip-2 .stranded-tooltip-note').html(numberWithCommas(+data.Scenario_12_AssetShareLost) + `% of ${data.Area}'s fossil fuel assets`)
         tooltip.select('#tooltip-3 .stranded-tooltip-figure').html(`${+data.Scenario_12_LostGDP > 0 ? '+' : ''}${numberWithCommas(+data.Scenario_12_LostGDP)}%`)
         tooltip.select('#tooltip-2 .stranded-tooltip-subheader').html('In net zero scenario with Opec sell-off')
+        tooltip.select('#tooltip-3 .stranded-tooltip-header').html(`GDP by 2036`)
+        tooltip.select('#tooltip-2 .stranded-tooltip-header').html('Stranded assets')
+        tooltip.select('#tooltip-1 .stranded-tooltip-header').html('Fossil fuel assets')
+
 
         break;
 
@@ -510,6 +570,9 @@ const manageTooltip = (data) => {
         tooltip.select('#tooltip-2 .stranded-tooltip-note').html(numberWithCommas(+data.Scenario_12_AssetShareLost) + `% of ${data.Area}'s fossil fuel assets`)
         tooltip.select('#tooltip-3 .stranded-tooltip-figure').html(`${+data.Scenario_12_LostGDP > 0 ? '+' : ''}${numberWithCommas(+data.Scenario_12_LostGDP)}%`)
         tooltip.select('#tooltip-2 .stranded-tooltip-subheader').html('In net zero scenario with Opec sell-off')
+        tooltip.select('#tooltip-3 .stranded-tooltip-header').html(`GDP by 2036`)
+        tooltip.select('#tooltip-2 .stranded-tooltip-header').html('Stranded assets')
+        tooltip.select('#tooltip-1 .stranded-tooltip-header').html('Fossil fuel assets')
 
         break;
 
@@ -522,6 +585,9 @@ const manageTooltip = (data) => {
         tooltip.select('#tooltip-2 .stranded-tooltip-note').html(numberWithCommas(+data.Scenario_11_AssetShareLost) + `% of ${data.Area}'s fossil fuel assets`)
         tooltip.select('#tooltip-3 .stranded-tooltip-figure').html(`${+data.Scenario_11_LostGDP > 0 ? '+' : ''}${numberWithCommas(+data.Scenario_11_LostGDP)}%`)
         tooltip.select('#tooltip-2 .stranded-tooltip-subheader').html('In net zero scenario with Opec quota')
+        tooltip.select('#tooltip-3 .stranded-tooltip-header').html(`GDP by 2036`)
+        tooltip.select('#tooltip-2 .stranded-tooltip-header').html('Stranded assets')
+        tooltip.select('#tooltip-1 .stranded-tooltip-header').html('Fossil fuel assets')
 
 
         break;
@@ -535,6 +601,9 @@ const manageTooltip = (data) => {
         tooltip.select('#tooltip-2 .stranded-tooltip-note').html(numberWithCommas(+data.Scenario_11_AssetShareLost) + `% of ${data.Area}'s fossil fuel assets`)
         tooltip.select('#tooltip-3 .stranded-tooltip-figure').html(`${+data.Scenario_11_LostGDP > 0 ? '+' : ''}${numberWithCommas(+data.Scenario_11_LostGDP)}%`)
         tooltip.select('#tooltip-2 .stranded-tooltip-subheader').html('In net zero scenario with Opec quota')
+        tooltip.select('#tooltip-3 .stranded-tooltip-header').html(`GDP by 2036`)
+        tooltip.select('#tooltip-2 .stranded-tooltip-header').html('Stranded assets')
+        tooltip.select('#tooltip-1 .stranded-tooltip-header').html('Fossil fuel assets')
 
         break;
 
@@ -547,6 +616,9 @@ const manageTooltip = (data) => {
         tooltip.select('#tooltip-2 .stranded-tooltip-note').html(numberWithCommas(+data.Scenario_11_AssetShareLost) + `% of ${data.Area}'s fossil fuel assets`)
         tooltip.select('#tooltip-3 .stranded-tooltip-figure').html(`${+data.Scenario_11_LostGDP > 0 ? '+' : ''}${numberWithCommas(+data.Scenario_11_LostGDP)}%`)
         tooltip.select('#tooltip-2 .stranded-tooltip-subheader').html('In net zero scenario with Opec quota')
+        tooltip.select('#tooltip-3 .stranded-tooltip-header').html(`GDP by 2036`)
+        tooltip.select('#tooltip-2 .stranded-tooltip-header').html('Stranded assets')
+        tooltip.select('#tooltip-1 .stranded-tooltip-header').html('Fossil fuel assets')
 
         break;
 
@@ -559,6 +631,9 @@ const manageTooltip = (data) => {
         tooltip.select('#tooltip-2 .stranded-tooltip-note').html(numberWithCommas(+data.Scenario_11_AssetShareLost) + `% of ${data.Area}'s fossil fuel assets`)
         tooltip.select('#tooltip-3 .stranded-tooltip-figure').html(`${+data.Scenario_11_LostGDP > 0 ? '+' : ''}${numberWithCommas(+data.Scenario_11_LostGDP)}%`)
         tooltip.select('#tooltip-2 .stranded-tooltip-subheader').html('In net zero scenario with Opec quota')
+        tooltip.select('#tooltip-3 .stranded-tooltip-header').html(`GDP by 2036`)
+        tooltip.select('#tooltip-2 .stranded-tooltip-header').html('Stranded assets')
+        tooltip.select('#tooltip-1 .stranded-tooltip-header').html('Fossil fuel assets')
 
         break;
     }
@@ -600,14 +675,14 @@ const clearAnnotations = () => {
 
 }
 
-const makeAnnotation = (country_name, text, align = 'left', textWidth = 130, offsetX = 20, offsetY = 15) => {
+const makeAnnotation = (country_name, text, align = 'left', textWidth = 130, offsetX = 20, offsetY = 15, textheight = 130) => {
 
     let node = country_name.indexOf('stranded') != -1 ?   mapStatic.select('.' + country_name) : map.select('.' + country_name)
 
     let r = +node.attr('r')
     let cx = +node.attr('cx').split('px')[0]
     let cy = +node.attr('cy').split('px')[0]
-    let posX = align == 'left' ? cx - r : cx + r;
+    let posX = cx;
     let posY = cy;
 
 
@@ -616,7 +691,7 @@ const makeAnnotation = (country_name, text, align = 'left', textWidth = 130, off
         let annBg = annotations
         .append("text")
         .attr("class", "annotationBg")
-        .attr("x", d => posX - offsetX - textWidth - 5)
+        .attr("x", d => posX - r - offsetX - textWidth - 5)
         .attr("y", d => posY + offsetY)
         .text(text)
         .call(wrap, textWidth, 'textBg');
@@ -624,13 +699,13 @@ const makeAnnotation = (country_name, text, align = 'left', textWidth = 130, off
         let ann = annotations
         .append("text")
         .attr("class", "annotation")
-        .attr("x", posX - offsetX - textWidth - 5 )
+        .attr("x", posX - offsetX - r - textWidth - 5 )
         .attr("y", posY + offsetY)
         .text(text)
         .call(wrap, textWidth);
 
 
-        let line = d3.line()([[posX , posY], [ posX, posY], [posX - offsetX, posY]])
+        let line = d3.line()([[posX - r, posY], [ posX - r, posY], [posX - r - offsetX, posY]])
 
         annotations
         .append('path')
@@ -643,28 +718,20 @@ const makeAnnotation = (country_name, text, align = 'left', textWidth = 130, off
         let annBg = annotations
         .append("text")
         .attr("class", "annotationBg")
-        .attr("x", posX - textWidth / 2)
-        .attr("y",posY - offsetY)
+        .attr("x", posX - textWidth / 2  + offsetX)
+        .attr("y",posY - textheight - offsetY)
         .text(text)
         .call(wrap, textWidth, 'textBg');
 
         let ann = annotations
         .append("text")
         .attr("class", "annotation")
-        .attr("x", posX - textWidth / 2)
-        .attr("y",posY - offsetY)
+        .attr("x", posX - textWidth / 2 + offsetX)
+        .attr("y",posY - textheight - offsetY)
         .text(text)
         .call(wrap, textWidth);
 
-        let annHeight = d3.select('.annotation').node().getBoundingClientRect().height;
-
-        d3.selectAll(".annotationBg")
-        .style('transform', `translate(0,-${annHeight + 10}px)`)
-
-        d3.selectAll('.annotation')
-        .style('transform', `translate(0,-${annHeight + 10}px)`)
-
-        let line = d3.line()([[posX - r, posY - r], [ posX - r, posY - r], [posX - r, posY - 20]])
+        let line = d3.line()([[posX , posY - r ], [ posX , posY - r], [posX , posY - r - 20]])
 
         annotations
         .append('path')
@@ -678,7 +745,7 @@ const makeAnnotation = (country_name, text, align = 'left', textWidth = 130, off
         let annBg = annotations
         .append("text")
         .attr("class", "annotationBg")
-        .attr("x",posX + offsetX + 5)
+        .attr("x",posX + r + offsetX + 5)
         .attr("y",posY - offsetY)
         .text(text)
         .call(wrap, textWidth, 'textBg');
@@ -686,12 +753,12 @@ const makeAnnotation = (country_name, text, align = 'left', textWidth = 130, off
         let ann = annotations
         .append("text")
         .attr("class", "annotation")
-        .attr("x",posX + offsetX + 5 )
+        .attr("x",posX + r + offsetX + 5 )
         .attr("y",posY - offsetY)
         .text(text)
         .call(wrap, textWidth);
 
-        let line = d3.line()([[posX, posY], [ posX, posY], [posX + offsetX , posY]])
+        let line = d3.line()([[posX + r , posY], [ posX + r , posY], [posX + r  + offsetX , posY]])
 
         annotations
         .append('path')
@@ -746,4 +813,13 @@ const wrap = (text, width, className = '') => {
     });
 }
 
+
+const resetTooltip = () => {
+
+    d3.selectAll('#tooltip-0').html('')
+    d3.selectAll('.stranded-tooltip-header').html('')
+    d3.selectAll('.stranded-tooltip-subheader').html('')
+    d3.selectAll('.stranded-tooltip-figure').html('')
+    d3.selectAll('.stranded-tooltip-note').html('')
+}
 

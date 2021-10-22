@@ -2,27 +2,60 @@
 // @import "enhanced_fonts";
 @import "mq";
 @import "palette";
-// @import "enhancer";
+@import "enhancer";
 // gu_grid pulls the css for gs-container and content__main-column
 // @import "gu_grid";
 @import "scrolly";
 
-.interactive-atom {
+/* .interactive-atom {
     margin: 0;
     padding: 0;
-}
+} */
 
 // for apps adds extra padding. Needed to make dark mode work
+
 .ios, .android {
     .interactive-atom {
         padding: 8px;
     }
 }
 
-.dorling-interactive-wrapper{
-	background:white;
-	border-bottom: 1px solid #dcdcdc;
+.interactive-wrapper{
+
+	@include mq(tablet) {
+	 	margin-left: -20px;
+	 }
+
+	 @include mq(desktop) {
+	 	margin-left:-10px;
+	 }
+
+	@include mq(leftCol) {
+	 	margin-left:-180px;
+	 }
+
+	 @include mq(wide) {
+	 	margin-left: -240px;
+	 }
+
 }
+
+.scroll-wrapper{
+	background:transparent;
+
+	@include mq($from: 0px,  $until: 740px){
+		background: white;
+	}
+
+}
+
+.dorling-svg{
+	@include mq($from: 0px,  $until: 740px){
+		background: white;
+	}
+}
+
+
 
 .North.America{fill:$live-red;stroke:$live-red;&.over{stroke:#333;}}
 .South.America{fill:#ffe500;stroke:#ffe500;&.over{stroke:#333;}}
@@ -162,10 +195,6 @@
 
 		z-index:-1;
 	}
-
- 	@include mq($from: 500px) {
-		//top:calc(100vh /2 - 150px);
-	}
 } 
 
 .scroll-text__div {
@@ -173,11 +202,21 @@
 	hr{
 		border: .7px solid #333;
 		background:#333;
-		width: 10%;
 		margin-left: 0;
 		padding: 0;
 		margin: 0;
+		-webkit-transition: width 1s ease-in-out;
+	    -moz-transition: width 1s ease-in-out;
+	    -o-transition: width 1s ease-in-out;
+	    transition: width 1s ease-in-out;
+		
 	}
+
+	
+	.hr1{width:0%;}
+	.hr2{width:25%;}
+	.hr3{width:50%;}
+	.hr4{width:75%;}
 
 	h2{
 		margin:0;
@@ -195,7 +234,7 @@
 	}
 
 
-	max-width: 320px;
+	max-width: 330px;
 
 	@include mq($from: 100px, $until: 499px) {
 		max-width: 100%;
