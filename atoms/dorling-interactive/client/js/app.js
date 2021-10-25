@@ -6,7 +6,8 @@ import { numberWithCommas } from 'shared/js/util'
 
 const isMobile = window.matchMedia('(max-width: 720px)').matches;
 const isDesktop = window.matchMedia('(max-width: 980px)').matches;
-const isWide = window.matchMedia('(max-width: 1300px)').matches;
+
+const enviroment = d3.select('.interactive-wrapper').node() != null ? d3.select('.interactive-wrapper').node() : d3.select('.interactive-atom').node()
 
 const atomEl = d3.select('.dorling-interactive-wrapper').node();
 
@@ -15,7 +16,7 @@ const tooltip = d3.select('.stranded-assets-tooltips')
 const width = atomEl.getBoundingClientRect().width;
 const height = isMobile ? (window.innerHeight / 2) - 25 : window.innerHeight;
 
-console.log('v2', width)
+console.log('v1')
 
 const margin = {top:25, right:5, bottom:25, left:isDesktop ? 0 : 330}
 
@@ -121,7 +122,7 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
 	.force("collide", d3.forceCollide(d => 2 + radius(d.Scenario_1_A)))
 	.stop();
 
-	for (let i = 0; i < 40; i++){
+	for (let i = 0; i < 120; i++){
 	    simulation.tick();
 	}
 
@@ -190,9 +191,6 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
         d3.select('.hr1')
         .style('width', '25%')
 
-        radius
-        .domain([0, d3.max(data, d => +d.Scenario_1_A)])
-
         mapStatic.selectAll("circle")
         .transition()
         .duration(500)
@@ -227,9 +225,6 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
             if(!isMobile)makeAnnotation('Russia', "Russia's fossil fuel assets are projected to be valued at $3.8trn if no climate action is taken", 'top', 180, 0, 65, 85)
         }, 500);
 
-        d3.select('.stranded-tooltips')
-        .style('flex-direction', 'column')
-
     
 
     }})
@@ -244,8 +239,6 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
 
         clearAnnotations()
 
-        radius
-        .domain([0, d3.max(data, d => +d.Scenario_1_A)])
 
         clearAnnotations()
 
@@ -255,9 +248,6 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
         .attr("cy", d => d.y + 'px')
         .attr('cx', d => d.x + 'px')
         .attr("r", d => radius(+d.Scenario_1_A))
-
-        d3.select('.stranded-tooltips')
-        .style('flex-direction', 'column')
 
     }})
 
@@ -276,18 +266,13 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
 
         clearAnnotations()
 
-        radius
-        .domain([0, d3.max(data, d => +d.Scenario_1_A)])
 
         map.selectAll("circle")
         .transition()
         .duration(500)
         .attr("cy", d => d.y + 'px')
         .attr('cx', d => d.x + 'px')
-        .attr("r", d => radius(+d.Scenario_12_SAtooltip))
-
-        d3.select('.stranded-tooltips')
-        .style('flex-direction', 'column')
+        .attr("r", d => radius(+d.Scenario_12_SA))
 
        
 
@@ -303,17 +288,13 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
 
         clearAnnotations()
 
-        radius
-        .domain([0, d3.max(data, d => +d.Scenario_1_A)])
-
-        
 
         map.selectAll("circle")
         .transition()
         .duration(500)
         .attr("cy", d => d.y + 'px')
         .attr('cx', d => d.x + 'px')
-        .attr("r", d => radius(+d.Scenario_12_SAtooltip))
+        .attr("r", d => radius(+d.Scenario_12_SA))
 
         
         setTimeout(d => {
@@ -324,9 +305,6 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
             if(!isMobile)makeAnnotation('USA', "The US's real value of fossil fuel assets would stand at $2.1trn, after 62% of the total becomes stranded", 'right', 200, 15, 35)
         }
             , 500);
-
-        d3.select('.stranded-tooltips')
-        .style('flex-direction', 'column')
         
     }})
 
@@ -357,10 +335,7 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
         .duration(500)
         .attr("cy", d => d.y + 'px')
         .attr('cx', d => d.x + 'px')
-        .attr("r", d => radius(+d.Scenario_11_SAtooltip))
-
-        d3.select('.stranded-tooltips')
-        .style('flex-direction', 'column')
+        .attr("r", d => radius(+d.Scenario_11_SA))
 
     }})
 
@@ -380,7 +355,6 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
         labels.style('display', 'block')
         bars.selectAll('path').remove()
 
-
         simulation
         .force("collide", d3.forceCollide(d => 1 + radius(d.Scenario_1_A)))
 
@@ -389,7 +363,7 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
         .duration(500)
         .attr("cy", d => d.y + 'px')
         .attr('cx', d => d.x + 'px')
-        .attr("r", d => radius(+d.Scenario_11_SAtooltip))
+        .attr("r", d => radius(+d.Scenario_11_SA))
 
         
         setTimeout(d => {
@@ -399,12 +373,6 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
             if(!isMobile)makeAnnotation('China-stranded', "Over half of China's fossil fuel assets are also set to be stranded", 'left', 200, 15,0)
         }, 500)
 
-        d3.select('.stranded-tooltips')
-        .style('flex-direction', 'column')
-
-        
-
-        
     }})
 
     scrolly.addTrigger({num:7, do: () => {
@@ -443,10 +411,6 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
         .attr('d', (d,i) => `M${xScale(i)},${yScale(0)} L${xScale(i)},${yScale(d.Scenario_11_LostGDP)}`)
         .attr('stroke', '#eaeaea')
         .attr('stroke-width', '1.5px')
-
-
-        d3.select('.stranded-tooltips')
-        .style('flex-direction', 'column-reverse')
 
         setTimeout(d => {
 
@@ -501,10 +465,6 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
             makeAnnotation('UK', "UK", 'top', 25, 0, 0, 30)
         },500)
 
-
-        d3.select('.stranded-tooltips')
-        .style('flex-direction', 'column-reverse')
-        
     }})
 
 
@@ -529,6 +489,7 @@ const manageTooltip = (data) => {
         tooltip.select('#tooltip-1 .stranded-tooltip-subheader').html('Estimated in business-as-usual scenario')
         tooltip.select('#tooltip-2 .stranded-tooltip-header').html('Stranded assets')
         tooltip.select('#tooltip-1 .stranded-tooltip-header').html('Fossil fuel assets')
+        d3.select('.stranded-tooltips').style('flex-direction', 'column')
 
 
         break;
@@ -542,6 +503,7 @@ const manageTooltip = (data) => {
         tooltip.select('#tooltip-1 .stranded-tooltip-subheader').html('Estimated in business-as-usual scenario')
         tooltip.select('#tooltip-2 .stranded-tooltip-header').html('Stranded assets')
         tooltip.select('#tooltip-1 .stranded-tooltip-header').html('Fossil fuel assets')
+        d3.select('.stranded-tooltips').style('flex-direction', 'column')
 
         break;
 
@@ -557,6 +519,7 @@ const manageTooltip = (data) => {
         tooltip.select('#tooltip-3 .stranded-tooltip-header').html(`GDP by 2036`)
         tooltip.select('#tooltip-2 .stranded-tooltip-header').html('Stranded assets')
         tooltip.select('#tooltip-1 .stranded-tooltip-header').html('Fossil fuel assets')
+        d3.select('.stranded-tooltips').style('flex-direction', 'column')
 
 
         break;
@@ -573,6 +536,7 @@ const manageTooltip = (data) => {
         tooltip.select('#tooltip-3 .stranded-tooltip-header').html(`GDP by 2036`)
         tooltip.select('#tooltip-2 .stranded-tooltip-header').html('Stranded assets')
         tooltip.select('#tooltip-1 .stranded-tooltip-header').html('Fossil fuel assets')
+        d3.select('.stranded-tooltips').style('flex-direction', 'column')
 
         break;
 
@@ -588,6 +552,7 @@ const manageTooltip = (data) => {
         tooltip.select('#tooltip-3 .stranded-tooltip-header').html(`GDP by 2036`)
         tooltip.select('#tooltip-2 .stranded-tooltip-header').html('Stranded assets')
         tooltip.select('#tooltip-1 .stranded-tooltip-header').html('Fossil fuel assets')
+        d3.select('.stranded-tooltips').style('flex-direction', 'column')
 
 
         break;
@@ -604,6 +569,7 @@ const manageTooltip = (data) => {
         tooltip.select('#tooltip-3 .stranded-tooltip-header').html(`GDP by 2036`)
         tooltip.select('#tooltip-2 .stranded-tooltip-header').html('Stranded assets')
         tooltip.select('#tooltip-1 .stranded-tooltip-header').html('Fossil fuel assets')
+        d3.select('.stranded-tooltips').style('flex-direction', 'column')
 
         break;
 
@@ -619,6 +585,7 @@ const manageTooltip = (data) => {
         tooltip.select('#tooltip-3 .stranded-tooltip-header').html(`GDP by 2036`)
         tooltip.select('#tooltip-2 .stranded-tooltip-header').html('Stranded assets')
         tooltip.select('#tooltip-1 .stranded-tooltip-header').html('Fossil fuel assets')
+        d3.select('.stranded-tooltips').style('flex-direction', 'column-reverse')
 
         break;
 
@@ -634,6 +601,7 @@ const manageTooltip = (data) => {
         tooltip.select('#tooltip-3 .stranded-tooltip-header').html(`GDP by 2036`)
         tooltip.select('#tooltip-2 .stranded-tooltip-header').html('Stranded assets')
         tooltip.select('#tooltip-1 .stranded-tooltip-header').html('Fossil fuel assets')
+        d3.select('.stranded-tooltips').style('flex-direction', 'column-reverse')
 
         break;
     }
@@ -643,6 +611,8 @@ const manageTooltip = (data) => {
 const manageMove = (event) => {
 
     tooltip.classed('over', true)
+
+
 
     let left = event.clientX + -atomEl.getBoundingClientRect().left;
     let top = event.clientY + -atomEl.getBoundingClientRect().top;

@@ -20,6 +20,12 @@
     }
 }
 
+.interactive-wrapper, .interactive-atom{
+
+	
+
+}
+
 .interactive-wrapper{
 
 	@include mq(tablet) {
@@ -265,6 +271,7 @@
 }
 
 .label-country{
+	pointer-events: none;
 	@include fs-textSans(3);
 	fill:#fff;
 }
