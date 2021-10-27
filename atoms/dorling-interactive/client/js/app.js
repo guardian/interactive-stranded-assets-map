@@ -226,7 +226,7 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
 
             clearAnnotations()
 
-            if(!isMobile)makeAnnotation('Russia', "Russia's fossil fuel assets are projected to be valued at $3.8trn if no climate action is taken", 'top', 180, 0, 65, 85)
+            if(!isMobile)makeAnnotation('Russia', "Russia's fossil fuel assets are projected to be valued at $3.8tr if no climate action is taken", 'top', 180, 0, 65, 85)
 
             if(isMobile)
             {
@@ -320,7 +320,7 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
             clearAnnotations()
 
 
-            if(!isMobile)makeAnnotation('USA', "The US's real value of fossil fuel assets would stand at $2.1trn, after 62% of the total becomes stranded", 'right', 200, 15, 35)
+            if(!isMobile)makeAnnotation('USA', "The US's real value of fossil fuel assets would stand at $2.1tr, after 62% of the total becomes stranded", 'right', 200, 15, 35)
         }
             , 500);
         
