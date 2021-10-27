@@ -14,9 +14,7 @@ const atomEl = d3.select('.dorling-interactive-wrapper').node();
 const tooltip = d3.select('.stranded-assets-tooltips')
 
 const width = atomEl.getBoundingClientRect().width;
-const height = isMobile ? (window.innerHeight / 2) - 25 : window.innerHeight;
-
-console.log('v1')
+const height = isMobile ? (window.innerHeight / 2) : window.innerHeight;
 
 const margin = {top:25, right:5, bottom:25, left:isDesktop ? 0 : 330}
 
@@ -182,6 +180,12 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
     .text(d => d.CONTINENT)
     .call(wrap, 50)
 
+    
+
+    //console.log(cirs)
+
+    
+
     scrolly.addTrigger({num:1, do: () => {
 
         currentBlob = 1;
@@ -223,6 +227,20 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
             clearAnnotations()
 
             if(!isMobile)makeAnnotation('Russia', "Russia's fossil fuel assets are projected to be valued at $3.8trn if no climate action is taken", 'top', 180, 0, 65, 85)
+
+            if(isMobile)
+            {
+                 let texts = labels.selectAll('text')
+                let cirs = mapStatic.selectAll('circle')
+
+                let maxY = d3.max(texts.nodes(), d => d.getBoundingClientRect().y)
+                let maxC = d3.max(cirs.nodes(), d => +d.r.baseVal.value + +d.getBoundingClientRect().y)
+
+
+                svg.attr('height', d3.max([maxY, maxC]) + 'px')
+            }
+               
+
         }, 500);
 
     
