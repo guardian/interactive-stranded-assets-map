@@ -44,6 +44,16 @@
 	 	margin-left: -240px;
 	 }
 
+	 &:before {
+        position: absolute;
+        top: 0;
+    
+        height: 100%;
+        min-height: 500px;
+        content: ' ';
+    
+    }
+
 }
 
 .scroll-wrapper{
@@ -56,6 +66,9 @@
 }
 
 .dorling-svg{
+
+	background: white;
+	
 	@include mq($from: 0px,  $until: 740px){
 		background: white;
 	}
@@ -197,9 +210,15 @@
 .scroll-text{
 
  	@include mq($from: 100px,  $until: 499px) {
+
 		top:calc( calc(100vh /2) + 25px);
 
-		z-index:-1;
+		-webkit-transform: translate3d(0,0,-1px);
+
+		//z-index:-1000;
+
+
+		
 	}
 } 
 
@@ -292,3 +311,34 @@
 
 //.css-nush53{position: relative;}
 
+.gv-text-section{
+
+    @include mq(leftCol) {
+        margin-left: 160px !important;
+    }
+    @include mq(wide) {
+        margin-left: 240px !important;
+    }
+
+    &:before {
+        position: absolute;
+        top: 0;
+    
+        height: 100%;
+        min-height: 500px;
+        content: ' ';
+    
+    
+        @include mq(leftCol) {
+            border-left:1px solid #dfdfdf;
+    
+          left: calc((100% - 1140px)/2 + 170px);
+        }
+    
+        @include mq(wide) {
+            border-left:1px solid #dfdfdf;
+    
+          left: calc((100% - 1300px)/2 + 250px);
+        }
+      }
+}

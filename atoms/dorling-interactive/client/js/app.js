@@ -4,7 +4,7 @@ import * as continents from 'assets/continents.json'
 import ScrollyTeller from "shared/js/scrollyteller"
 import { numberWithCommas } from 'shared/js/util'
 
-const isMobile = window.matchMedia('(max-width: 720px)').matches;
+const isMobile = window.matchMedia('(max-width: 700px)').matches;
 const isDesktop = window.matchMedia('(max-width: 980px)').matches;
 
 const enviroment = d3.select('.interactive-wrapper').node() != null ? d3.select('.interactive-wrapper').node() : d3.select('.interactive-atom').node()
@@ -226,11 +226,13 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
 
             clearAnnotations()
 
-            if(!isMobile)makeAnnotation('Russia', "Russia's fossil fuel assets are projected to be valued at $3.8tn if no climate action is taken", 'top', 180, 0, 65, 85)
+            console.log(width)
 
-            if(isMobile)
+            if(!isMobile)makeAnnotation('Russia', "Russia's fossil fuel assets are projected to be valued at $3.8tn if no climate action is taken", 'top', 180, 0, 65, width < 800 ? 55 : 85)
+
+            /*if(isMobile)
             {
-                 let texts = labels.selectAll('text')
+                let texts = labels.selectAll('text')
                 let cirs = mapStatic.selectAll('circle')
 
                 let maxY = d3.max(texts.nodes(), d => d.getBoundingClientRect().y)
@@ -238,7 +240,7 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
 
 
                 svg.attr('height', d3.max([maxY, maxC]) + 'px')
-            }
+            }*/
                
 
         }, 500);
@@ -625,12 +627,21 @@ const manageTooltip = (data) => {
     }
 }
 
+const resetTooltip = () => {
+
+    tooltip.classed('over', false)
+
+    d3.selectAll('#tooltip-0').html('')
+    d3.selectAll('.stranded-tooltip-header').html('')
+    d3.selectAll('.stranded-tooltip-subheader').html('')
+    d3.selectAll('.stranded-tooltip-figure').html('')
+    d3.selectAll('.stranded-tooltip-note').html('')
+}
+
 
 const manageMove = (event) => {
 
     tooltip.classed('over', true)
-
-
 
     let left = event.clientX + -atomEl.getBoundingClientRect().left;
     let top = event.clientY + -atomEl.getBoundingClientRect().top;
@@ -707,7 +718,7 @@ const makeAnnotation = (country_name, text, align = 'left', textWidth = 130, off
         .append("text")
         .attr("class", "annotationBg")
         .attr("x", posX - textWidth / 2  + offsetX)
-        .attr("y",posY - textheight - offsetY)
+        .attr("y", posY - textheight - offsetY)
         .text(text)
         .call(wrap, textWidth, 'textBg');
 
@@ -715,7 +726,7 @@ const makeAnnotation = (country_name, text, align = 'left', textWidth = 130, off
         .append("text")
         .attr("class", "annotation")
         .attr("x", posX - textWidth / 2 + offsetX)
-        .attr("y",posY - textheight - offsetY)
+        .attr("y", posY - textheight - offsetY)
         .text(text)
         .call(wrap, textWidth);
 
@@ -802,12 +813,10 @@ const wrap = (text, width, className = '') => {
 }
 
 
-const resetTooltip = () => {
 
-    d3.selectAll('#tooltip-0').html('')
-    d3.selectAll('.stranded-tooltip-header').html('')
-    d3.selectAll('.stranded-tooltip-subheader').html('')
-    d3.selectAll('.stranded-tooltip-figure').html('')
-    d3.selectAll('.stranded-tooltip-note').html('')
+window.onresize = (event) => {
+
+    svg.style('height', window.innerHeight + 'px')
+         
 }
 
