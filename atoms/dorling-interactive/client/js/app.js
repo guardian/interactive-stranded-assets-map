@@ -152,13 +152,13 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
             .classed('over', true)
 
         
-        })
-        .on('mouseout', e => {
+    })
+    .on('mouseout', e => {
             tooltip.classed('over', false)
 
             d3.select(e.target)
             .classed('over', false)
-        })
+    })
 
     labels.selectAll('blah')
     .data(continents.default.filter(f => f.CONTINENT != 'Antarctica'))
@@ -497,7 +497,7 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1jBl9XnXHZ8Uw8GOh1Pkna50wq
 
 const manageTooltip = (data) => {
 
-    tooltip.select('#tooltip-0').html(data.Area)
+            
 
     switch(currentBlob){
         case 1:
@@ -770,6 +770,8 @@ const makeAnnotation = (country_name, text, align = 'left', textWidth = 130, off
 }
 
 const wrap = (text, width, className = '') => {
+
+    console.log(text)
 
     text.each(function () {
 

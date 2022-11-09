@@ -44,16 +44,6 @@
 	 	margin-left: -240px;
 	 }
 
-	 &:before {
-        position: absolute;
-        top: 0;
-    
-        height: 100%;
-        min-height: 500px;
-        content: ' ';
-    
-    }
-
 }
 
 .scroll-wrapper{
@@ -68,7 +58,7 @@
 .dorling-svg{
 
 	background: white;
-	
+
 	@include mq($from: 0px,  $until: 740px){
 		background: white;
 	}
@@ -213,7 +203,7 @@
 
 		top:calc( calc(100vh /2) + 25px);
 
-		-webkit-transform: translate3d(0,0,-1px);
+		
 
 		//z-index:-1000;
 
